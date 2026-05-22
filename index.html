@@ -439,7 +439,7 @@
           <th class="col-manual">Compound</th>
           <th class="col-const">e⁻/mol</th>
           <th class="col-manual">T0 (mmol/l)</th>
-          <th class="col-manual">T24 (mmol/l)</th>
+          <th class="col-manual">tend (mmol/l)</th>
           <th class="col-calc">Net Δ (mmol/l)</th>
           <th class="col-calc">Charge (C)</th>
           <th class="col-calc">Current Contribution (A)</th>
@@ -466,15 +466,15 @@
   const F = 96485; // Faraday constant C/mol
 
   const defaultCompounds = [
-    { carbon: 'C1', name: 'Formic Acid',     electrons: 2,  t0: 0.00,  t24: 7.38  },
-    { carbon: 'C2', name: 'Acetic Acid',     electrons: 3,  t0: 2.15,  t24: 3.51  },
-    { carbon: 'C3', name: 'Propanoic Acid',  electrons: 14, t0: 0.00,  t24: 0.00  },
-    { carbon: 'C4', name: 'Butyric Acid',    electrons: 20, t0: 2.15,  t24: 6.50  },
-    { carbon: 'C5', name: 'IsoValeric Acid', electrons: 26, t0: 0.00,  t24: 1.12  },
-    { carbon: 'C5', name: 'Valeric Acid',    electrons: 26, t0: 0.00,  t24: 0.00  },
-    { carbon: 'C6', name: 'Isocaproic Acid', electrons: 32, t0: 24.36, t24: 3.96  },
-    { carbon: 'C6', name: 'Hexanoic Acid',   electrons: 32, t0: 71.65, t24: 3.35  },
-    { carbon: 'C7', name: 'Heptanoic Acid',  electrons: 38, t0: 3.98,  t24: 4.01  },
+    { carbon: 'C1', name: 'Formic Acid',     electrons: 2,  t0: 0.00,  tend: 7.38  },
+    { carbon: 'C2', name: 'Acetic Acid',     electrons: 8,  t0: 2.15,  tend: 3.51  },
+    { carbon: 'C3', name: 'Propanoic Acid',  electrons: 14, t0: 0.00,  tend: 0.00  },
+    { carbon: 'C4', name: 'Butyric Acid',    electrons: 20, t0: 2.15,  tend: 6.50  },
+    { carbon: 'C5', name: 'IsoValeric Acid', electrons: 26, t0: 0.00,  tend: 1.12  },
+    { carbon: 'C5', name: 'Valeric Acid',    electrons: 26, t0: 0.00,  tend: 0.00  },
+    { carbon: 'C6', name: 'Isocaproic Acid', electrons: 32, t0: 24.36, tend: 3.96  },
+    { carbon: 'C6', name: 'Hexanoic Acid',   electrons: 32, t0: 71.65, tend: 3.35  },
+    { carbon: 'C7', name: 'Heptanoic Acid',  electrons: 38, t0: 3.98,  tend: 4.01  },
   ];
 
   let compounds = defaultCompounds.map(c => ({...c}));
@@ -498,8 +498,8 @@
           oninput="compounds[${i}].electrons=+this.value;calculate()" /></td>
         <td class="num"><input type="number" value="${c.t0}" step="0.01"
           oninput="compounds[${i}].t0=+this.value;calculate()" /></td>
-        <td class="num"><input type="number" value="${c.t24}" step="0.01"
-          oninput="compounds[${i}].t24=+this.value;calculate()" /></td>
+        <td class="num"><input type="number" value="${c.tend}" step="0.01"
+          oninput="compounds[${i}].tend=+this.value;calculate()" /></td>
         <td class="num" id="net-${i}">—</td>
         <td class="num" id="charge-${i}">—</td>
         <td class="num" id="contrib-${i}">—</td>
@@ -518,7 +518,7 @@
     let totalCharge = 0;
 
     compounds.forEach((c, i) => {
-      const netChange = c.t0 - c.t24; // positive = consumed
+      const netChange = c.t0 - c.tend; // positive = consumed
       // Charge (C) = electrons × mmol/L × L × F × 1e-3 (mmol→mol)
       const charge = c.electrons * netChange * volume * F * 1e-3;
       const contrib = totalSeconds > 0 ? charge / totalSeconds : 0;
@@ -555,7 +555,7 @@
 
   function addRow() {
     const newIdx = compounds.length + 1;
-    compounds.push({ carbon: 'Cn', name: 'New Compound', electrons: 2, t0: 0, t24: 0 });
+    compounds.push({ carbon: 'Cn', name: 'New Compound', electrons: 2, t0: 0, tend: 0 });
     buildTable();
   }
 
